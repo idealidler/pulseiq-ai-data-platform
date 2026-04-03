@@ -1,0 +1,17 @@
+name: pulseiq
+version: 1.0.0
+config-version: 2
+
+profile: pulseiq
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+models:
+  pulseiq:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

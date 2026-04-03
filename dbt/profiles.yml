@@ -1,0 +1,7 @@
+pulseiq:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/warehouse/pulseiq.duckdb
+      threads: 4
