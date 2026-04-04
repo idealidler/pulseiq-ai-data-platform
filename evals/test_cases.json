@@ -1,0 +1,162 @@
+[
+  {
+    "id": "sql_top_risk_products",
+    "question": "Which products have the highest risk score?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["risk", "product"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "sql_high_refund_categories",
+    "question": "Which product categories had the highest refund rate recently?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["refund", "category"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "sql_top_support_page_views",
+    "question": "Which products have the highest support page views?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["support", "views", "product"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "sql_open_tickets",
+    "question": "Which products have the most open support tickets?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["open", "tickets", "product"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "sql_low_conversion",
+    "question": "Which products have the lowest product-view to purchase rate?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["purchase", "rate", "product"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "sql_resolution_time",
+    "question": "Which issue types have the highest average resolution time?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["issue", "resolution", "time"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "vector_battery_complaints",
+    "question": "What are customers saying about battery issues in electronics?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["battery", "electronics", "customers"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "vector_refund_delay",
+    "question": "Find recent refund delay complaints.",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["refund", "delay"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "vector_quality_concerns",
+    "question": "What quality concerns are customers raising for home products?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["quality", "home", "customers"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "vector_packaging_defects",
+    "question": "Summarize packaging defect complaints in beauty products.",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["packaging", "beauty", "defect"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "vector_return_request",
+    "question": "What are apparel customers saying in return request tickets?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["apparel", "return", "customers"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "vector_device_setup",
+    "question": "Find customer complaints about device setup problems.",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["device", "setup", "complaints"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "hybrid_risk_and_complaints",
+    "question": "Which products have the highest risk score and what are customers complaining about?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["risk", "complain", "customers"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "hybrid_support_vs_engagement",
+    "question": "Which products have both high support page views and rising complaints?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["support", "complaint", "product"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "hybrid_refunds_and_complaints",
+    "question": "Which products have high refund rates and what are customers saying about them?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["refund", "customers", "product"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "hybrid_low_csat_themes",
+    "question": "Which products have low CSAT and what complaint themes show up most often?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["csat", "complaint", "theme"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "hybrid_resolution_and_issues",
+    "question": "Which issue types take the longest to resolve and what are customers actually saying in those tickets?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["issue", "resolve", "customers"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "hybrid_apparel_returns",
+    "question": "Which apparel products are most risky and are customers mainly asking for returns or something else?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["apparel", "returns", "risky"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "no_evidence_extreme_claim",
+    "question": "Which products are causing legal compliance violations?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["insufficient", "evidence", "not enough"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "ambiguous_general_health",
+    "question": "What are the biggest operational risks right now?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["risk", "operational", "product"],
+    "max_answer_words": 220
+  }
+]

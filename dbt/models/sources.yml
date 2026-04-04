@@ -5,5 +5,7 @@ sources:
     schema: main
     tables:
       - name: raw_customers
-      - name: raw_products
+      - name: raw_events
       - name: raw_orders
+      - name: raw_products
+      - name: raw_support_tickets

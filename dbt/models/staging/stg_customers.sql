@@ -1,7 +1,7 @@
 select
     customer_id,
     cast(signup_ts as timestamp) as signup_ts,
-    initcap(region) as region,
+    upper(region) as region,
     upper(country) as country,
     lower(segment) as segment,
     lower(acquisition_channel) as acquisition_channel,

@@ -19,6 +19,8 @@ data/raw/
 data/staged/
 data/curated/
 data/warehouse/
+data/vector/
+evals/results/
 
 # dbt artifacts
 dbt/target/
@@ -29,3 +31,7 @@ dbt/logs/
 .DS_Store
 .idea/
 .vscode/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

@@ -5,8 +5,10 @@ from pathlib import Path
 import duckdb
 
 from ingestion.loaders.customers import load_customers
+from ingestion.loaders.events import load_events
 from ingestion.loaders.orders import load_orders
 from ingestion.loaders.products import load_products
+from ingestion.loaders.tickets import load_tickets
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +39,18 @@ def register_raw_tables() -> None:
             select * from read_parquet('{RAW_ROOT / "orders" / "orders.parquet"}')
             """
         )
+        con.execute(
+            f"""
+            create or replace table raw_events as
+            select * from read_parquet('{RAW_ROOT / "events" / "events.parquet"}')
+            """
+        )
+        con.execute(
+            f"""
+            create or replace table raw_support_tickets as
+            select * from read_parquet('{RAW_ROOT / "support_tickets" / "support_tickets.parquet"}')
+            """
+        )
     finally:
         con.close()
 
@@ -53,6 +67,14 @@ def main() -> None:
     load_orders(
         SOURCE_ROOT / "orders" / "orders.csv",
         RAW_ROOT / "orders" / "orders.parquet",
+    )
+    load_events(
+        SOURCE_ROOT / "events" / "events.jsonl",
+        RAW_ROOT / "events" / "events.parquet",
+    )
+    load_tickets(
+        SOURCE_ROOT / "support_tickets" / "support_tickets.csv",
+        RAW_ROOT / "support_tickets" / "support_tickets.parquet",
     )
     register_raw_tables()
     print("Raw ingestion completed successfully and DuckDB raw tables are ready.")
