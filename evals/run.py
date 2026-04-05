@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,12 +10,27 @@ from api.services.chat_service import answer_question
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TEST_CASES_PATH = ROOT / "evals" / "test_cases.json"
 RESULTS_DIR = ROOT / "evals" / "results"
 
 
-def load_test_cases() -> list[dict[str, Any]]:
-    return json.loads(TEST_CASES_PATH.read_text())
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run PulseIQ benchmark evaluations.")
+    parser.add_argument(
+        "--suite",
+        choices=["baseline", "v2", "top20"],
+        default="baseline",
+        help="Benchmark suite to run",
+    )
+    return parser.parse_args()
+
+
+def load_test_cases(suite: str) -> list[dict[str, Any]]:
+    suite_map = {
+        "baseline": ROOT / "evals" / "test_cases.json",
+        "v2": ROOT / "evals" / "test_cases_v2.json",
+        "top20": ROOT / "evals" / "test_cases_top20.json",
+    }
+    return json.loads(suite_map[suite].read_text())
 
 
 def _flatten_text(value: Any) -> str:
@@ -116,14 +132,17 @@ def summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def main() -> None:
-    cases = load_test_cases()
+    args = parse_args()
+    cases = load_test_cases(args.suite)
     results = [evaluate_case(case) for case in cases]
     summary = summarize_results(results)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    output_path = RESULTS_DIR / f"eval_results_{timestamp}.json"
-    output_path.write_text(json.dumps({"summary": summary, "results": results}, indent=2))
+    output_path = RESULTS_DIR / f"eval_results_{args.suite}_{timestamp}.json"
+    output_path.write_text(
+        json.dumps({"suite": args.suite, "summary": summary, "results": results}, indent=2)
+    )
 
     print("Evaluation summary:")
     print(json.dumps(summary, indent=2))

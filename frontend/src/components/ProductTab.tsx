@@ -1,16 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  Bot,
-  Database,
-  LineChart,
-  LoaderCircle,
-  MessageSquare,
-  Minus,
-  Radar,
-  Server,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Bot, Database, LineChart, LoaderCircle, MessageSquare, Minus, Radar, Server, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { streamPulseIQ } from "../lib/api";
@@ -22,31 +11,48 @@ type Message = {
   status?: string;
 };
 
-const prompts = [
-  "Which products have the highest risk score and what are customers complaining about?",
-  "Which categories have the highest refund rate recently?",
+const topQuestions = [
+  "Which is the highest selling product?",
+  "Which customer has filed for the most refunds?",
+  "Which product categories have the highest refund rate?",
+  "Which regions are driving the most net revenue?",
+  "Which products are converting best from product views to purchases?",
+  "Which issue types are creating the biggest support load?",
+  "Which products have the lowest CSAT and what are customers saying?",
+  "Which products have the highest refund rates and why are customers unhappy with them?",
   "What are customers saying about battery issues in electronics?",
+  "Summarize wrong-item complaints in apparel.",
+  "What are customers saying about confusing setup experiences?",
+  "What changed in the last 30 days for refund-related customer pain?",
+  "Compare electronics and beauty in terms of risk and complaint themes.",
+  "Give me the current operational picture in one answer.",
+  "Which risky products also drive the most support page views, and what complaint themes back that up?",
+  "Which issue types take longest to resolve, and how do customers describe those experiences?",
+  "Are apparel customers mostly asking for returns or talking about something else?",
+  "Which products look operationally fragile, and what specific customer pain backs that up?",
+  "Which regions look weaker lately based on revenue and customer complaints?",
+  "Show the riskiest products, but only claim complaint themes if the ticket evidence matches the same product.",
 ];
 
 const stats = [
-  { label: "Context windows used", value: "1", icon: LineChart },
-  { label: "Tokens used end to end", value: "160K", icon: Radar },
-  { label: "Prompting style", value: "Tight, iterative, low waste", icon: Bot },
-  { label: "Build stack shipped", value: "DuckDB + dbt + Qdrant", icon: Database },
+  { label: "Top-20 benchmark", value: "18 / 20", icon: LineChart },
+  { label: "Average score", value: "0.93", icon: Radar },
+  { label: "Route accuracy", value: "90%", icon: Bot },
+  { label: "Runtime failures", value: "0", icon: Database },
 ];
 
 const featureCards = [
   {
-    title: "Data platform first",
-    body: "Synthetic sources, raw Parquet, DuckDB, dbt marts, embeddings, evals. The chatbot is the interface, not the whole story.",
+    title: "Source to warehouse",
+    body: "Synthetic source feeds land in raw Parquet and are modeled into serving tables in DuckDB with dbt.",
   },
   {
-    title: "Honest product framing",
-    body: "The tone is playful on purpose. The implementation underneath is very real and intentionally modeled like a production-grade system.",
+    title: "Retrieval + orchestration",
+    body: "Support-ticket text is indexed for semantic search, and the backend chooses SQL, vector search, or both.",
   },
   {
-    title: "Evidence over vibes",
-    body: "SQL handles metrics, vector search handles customer language, and hybrid answers only happen when both kinds of evidence are needed.",
+    title: "Measured quality",
+    body: "The interface is backed by benchmark suites that check routing quality, grounded evidence, conciseness, and runtime stability.",
   },
 ];
 
@@ -62,6 +68,9 @@ export function ProductTab() {
   const [loading, setLoading] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const promptStartIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % topQuestions.length;
+  const prompts = Array.from({ length: 5 }, (_, offset) => topQuestions[(promptStartIndex + offset) % topQuestions.length]);
 
   useEffect(() => {
     if (!chatOpen) {
@@ -174,30 +183,24 @@ export function ProductTab() {
 
       <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-10 md:px-10">
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2.5rem] border border-ink/10 bg-ink px-8 py-10 text-shell shadow-panel">
-            <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.26em] text-shell/60">
+          <div className="rounded-[2.5rem] border border-ink/10 bg-ink px-8 py-9 text-shell shadow-panel">
+            <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.26em] text-shell/75">
               <Server className="h-4 w-4" />
-              Self-aware product demo
+              Learning project, built like a product
             </div>
-            <h1 className="mt-5 max-w-4xl font-display text-5xl leading-[0.95] text-shell md:text-7xl">
-              Not a real startup.
-              <br />
-              Very real data engineering.
+            <h1 className="mt-5 max-w-4xl font-display text-4xl leading-[0.96] text-shell md:text-[4.35rem]">
+              I built this to learn data engineering properly.
             </h1>
-            <p className="mt-6 max-w-2xl text-sm leading-7 text-shell/78">
-              PulseIQ is what happened when “I should probably learn end-to-end data engineering properly” turned into synthetic source systems, raw Parquet, DuckDB, dbt marts, embeddings, hybrid retrieval, evals, and a chatbot that can actually answer something useful.
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-shell/85">
+              The project simulates an e-commerce business, moves data through ingestion and modeling layers, and then
+              exposes that data through an AI assistant that can answer business and support questions.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setChatOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:brightness-95"
-              >
-                Open chatbot
-                <ArrowRight className="h-4 w-4" />
-              </button>
-              <div className="rounded-full border border-white/10 px-4 py-3 text-sm text-shell/72">
-                Built for learning. Shipped like it mattered.
+            <div className="mt-7 flex flex-wrap gap-3">
+              <div className="rounded-full border border-white/10 px-4 py-2.5 text-sm text-shell/82">
+                Synthetic commerce + support data
+              </div>
+              <div className="rounded-full border border-white/10 px-4 py-2.5 text-sm text-shell/82">
+                DuckDB, dbt, Qdrant, FastAPI, React
               </div>
             </div>
           </div>
@@ -206,11 +209,11 @@ export function ProductTab() {
             {stats.map(({ label, value, icon: Icon }) => (
               <div
                 key={label}
-                className="rounded-[1.8rem] border border-ink/10 bg-white/85 p-6 shadow-panel backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-ink/20"
+                className="rounded-[1.7rem] border border-ink/10 bg-white/85 p-5 shadow-panel backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-ink/20"
               >
-                <Icon className="h-6 w-6 text-accent" />
-                <div className="mt-7 text-[11px] uppercase tracking-[0.24em] text-steel">{label}</div>
-                <div className="mt-2 text-2xl font-semibold leading-tight text-ink">{value}</div>
+                <Icon className="h-5 w-5 text-accent" />
+                <div className="mt-6 text-[10px] uppercase tracking-[0.24em] text-steel/90">{label}</div>
+                <div className="mt-2 text-[1.65rem] font-semibold leading-tight text-ink">{value}</div>
               </div>
             ))}
           </div>
@@ -223,29 +226,48 @@ export function ProductTab() {
               Project thesis
             </div>
             <h2 className="mt-3 text-3xl font-semibold text-ink">
-              I wanted one serious learning arc, not five half-finished demos.
+              A full-stack data workflow designed around one usable serving layer.
             </h2>
             <div className="mt-5 space-y-4 text-sm leading-7 text-steel">
               <p>
-                So the site is intentionally honest: yes, this is a showcase. No, it is not pretending to be an actual venture-backed company with suspiciously smooth copywriting.
+                The project starts with synthetic source systems, lands raw data in Parquet, models warehouse-serving tables in DuckDB with dbt, and builds a retrieval layer over support-ticket text.
               </p>
               <p>
-                The joke is the tone. The non-joke is the backend. The whole point was to understand how ingestion, modeling, serving tables, semantic retrieval, and evaluation fit together in one coherent system.
+                The chatbot is the final interface, but the real work is the pipeline underneath: ingestion, transformations, serving marts, semantic indexing, prompt design, and benchmark-based evaluation.
+              </p>
+              <p>
+                The business data covers orders, refunds, revenue, product performance, customer segments, behavioral events like product views and checkout activity, and support tickets with issue type, priority, CSAT, resolution time, and ticket text.
+              </p>
+              <p>
+                The benchmark numbers above reflect how reliably the assistant routes between SQL and retrieval, stays concise, and answers without runtime failures.
               </p>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-ink/10 bg-mist p-8 shadow-panel">
-            <div className="text-xs uppercase tracking-[0.24em] text-pine">Prompt starter pack</div>
-            <div className="mt-5 grid gap-3">
-              {prompts.map((prompt) => (
+          <div className="overflow-hidden rounded-[2rem] border border-pine/15 bg-[linear-gradient(160deg,rgba(15,92,75,0.98),rgba(11,34,41,0.96))] p-8 text-shell shadow-panel">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.24em] text-shell/75">Prompt starter pack</div>
+                <div className="mt-2 max-w-md text-2xl font-semibold leading-tight text-shell">
+                  The tool can answer questions like these for the business:
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-3">
+              {prompts.map((prompt, index) => (
                 <button
                   key={prompt}
                   type="button"
                   onClick={() => handlePromptClick(prompt)}
-                  className="rounded-[1.4rem] border border-pine/15 bg-white px-5 py-4 text-left text-sm leading-6 text-ink transition duration-200 hover:-translate-y-0.5 hover:border-pine/30 hover:shadow-panel"
+                  className="group rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-4 text-left text-sm leading-6 text-shell transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/12"
                 >
-                  {prompt}
+                  <div className="flex items-start gap-4">
+                    <div className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full border border-white/10 bg-white/10 text-[11px] font-semibold text-shell/90">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">{prompt}</div>
+                    <ArrowRight className="mt-1 h-4 w-4 flex-none text-shell/60 transition duration-200 group-hover:translate-x-0.5 group-hover:text-shell/85" />
+                  </div>
                 </button>
               ))}
             </div>
@@ -271,6 +293,7 @@ export function ProductTab() {
             <button
               type="button"
               onClick={() => setChatOpen(false)}
+              aria-label="Minimize PulseIQ Assistant"
               className="flex w-full items-center justify-between border-b border-ink/10 px-5 py-4 text-left transition duration-200 hover:bg-shell/80"
             >
               <div>
@@ -289,7 +312,12 @@ export function ProductTab() {
               </div>
             </button>
 
-            <div className="max-h-[460px] space-y-3 overflow-y-auto bg-shell/80 p-4">
+            <div
+              className="max-h-[min(460px,60vh)] space-y-3 overflow-y-auto bg-shell/80 p-4"
+              role="log"
+              aria-live="polite"
+              aria-label="PulseIQ conversation"
+            >
               {messages.map((message, index) => (
                 <div
                   key={`${message.role}-${index}`}
@@ -324,18 +352,26 @@ export function ProductTab() {
 
             <div className="border-t border-ink/10 p-4">
               <div className="flex flex-col gap-3">
+                <label htmlFor="pulseiq-question" className="text-xs font-medium uppercase tracking-[0.18em] text-steel">
+                  Ask a business question
+                </label>
                 <textarea
+                  id="pulseiq-question"
                   value={question}
                   onChange={(event) => setQuestion(event.target.value)}
                   onKeyDown={handleQuestionKeyDown}
                   placeholder="Ask about risk, refunds, complaints, or weird operational patterns..."
-                  className="min-h-[88px] w-full resize-none rounded-[1.25rem] border border-ink/10 bg-shell px-4 py-3 text-sm text-ink outline-none placeholder:text-steel/80"
+                  aria-describedby="pulseiq-input-help"
+                  className="min-h-[88px] w-full resize-none rounded-[1.25rem] border border-ink/10 bg-shell px-4 py-3 text-sm text-ink outline-none placeholder:text-steel/80 focus:border-pine/40 focus:ring-2 focus:ring-pine/20"
                 />
+                <div id="pulseiq-input-help" className="text-xs text-steel">
+                  Press Enter to send. Use Shift+Enter for a new line.
+                </div>
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => void submitQuestion()}
-                  className="flex items-center justify-center gap-2 rounded-[1.25rem] bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex items-center justify-center gap-2 rounded-[1.25rem] bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
                   {loading ? "Thinking" : "Ask PulseIQ"}
@@ -347,14 +383,15 @@ export function ProductTab() {
           <button
             type="button"
             onClick={() => setChatOpen(true)}
-            className="group flex items-center gap-3 rounded-full border border-ink/10 bg-white/96 px-5 py-4 shadow-panel backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-ink/20"
+            aria-label="Open PulseIQ Assistant"
+            className="group flex items-center gap-3 rounded-full border border-ink/10 bg-white/96 px-5 py-4 shadow-panel backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-ink/20 focus:outline-none focus:ring-2 focus:ring-accent/25"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white">
               <MessageSquare className="h-5 w-5" />
             </div>
             <div className="text-left">
-              <div className="text-sm font-semibold text-ink">Open chatbot</div>
-              <div className="text-xs text-steel">Ask the warehouse something useful</div>
+              <div className="text-sm font-semibold text-ink">PulseIQ Assistant</div>
+              <div className="text-xs text-steel">Ask about sales, refunds, risk, or complaints</div>
             </div>
           </button>
         )}

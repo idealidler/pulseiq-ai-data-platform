@@ -54,25 +54,25 @@ def _chunk_text(text: str, chunk_size: int = 220) -> list[str]:
 @app.post("/chat/stream")
 def chat_stream(request: ChatRequest) -> StreamingResponse:
     def event_stream():
-        yield f"event: status\ndata: {json.dumps({'message': 'Opening the pipeline...'})}\n\n"
-        yield f"event: status\ndata: {json.dumps({'message': 'Routing between SQL and semantic retrieval...'})}\n\n"
-        yield f"event: status\ndata: {json.dumps({'message': 'Gathering evidence from the data stack...'})}\n\n"
+        yield f"event: status\ndata: {json.dumps({'message': 'Opening the pipeline...'}, default=str)}\n\n"
+        yield f"event: status\ndata: {json.dumps({'message': 'Routing between SQL and semantic retrieval...'}, default=str)}\n\n"
+        yield f"event: status\ndata: {json.dumps({'message': 'Gathering evidence from the data stack...'}, default=str)}\n\n"
 
         try:
             result = answer_question(request.question, debug=request.debug)
         except Exception as exc:
-            yield f"event: error\ndata: {json.dumps({'message': str(exc)})}\n\n"
+            yield f"event: error\ndata: {json.dumps({'message': str(exc)}, default=str)}\n\n"
             return
 
-        yield f"event: status\ndata: {json.dumps({'message': 'Synthesizing the final answer...'})}\n\n"
+        yield f"event: status\ndata: {json.dumps({'message': 'Synthesizing the final answer...'}, default=str)}\n\n"
         for chunk in _chunk_text(result["answer"]):
-            yield f"event: answer_delta\ndata: {json.dumps({'delta': chunk})}\n\n"
+            yield f"event: answer_delta\ndata: {json.dumps({'delta': chunk}, default=str)}\n\n"
 
         payload = {
             "route": result["route"],
             "evidence": result["evidence"],
             "debug": result.get("debug"),
         }
-        yield f"event: complete\ndata: {json.dumps(payload)}\n\n"
+        yield f"event: complete\ndata: {json.dumps(payload, default=str)}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

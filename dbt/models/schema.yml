@@ -2,102 +2,500 @@ version: 2
 
 models:
   - name: stg_customers
+    description: Cleaned customer master data with one row per customer.
+    meta:
+      ai_hint:
+        role: "base"
+        grain: "one row per customer"
+        use_for: "customer attributes and joins"
+        avoid_for: "direct business reporting when a serving mart exists"
     columns:
       - name: customer_id
+        description: Stable customer identifier.
         tests:
           - not_null
           - unique
+      - name: region
+        description: Customer region used for geographic reporting.
+      - name: segment
+        description: Customer business segment, such as consumer or enterprise.
+      - name: acquisition_channel
+        description: Marketing or acquisition source associated with the customer.
 
   - name: stg_products
+    description: Cleaned product catalog with one row per product.
+    meta:
+      ai_hint:
+        role: "base"
+        grain: "one row per product"
+        use_for: "product attributes and joins"
+        avoid_for: "direct business reporting when a serving mart exists"
     columns:
       - name: product_id
+        description: Stable product identifier.
         tests:
           - not_null
           - unique
+      - name: product_name
+        description: Human-readable product name.
+      - name: category
+        description: Top-level product category used in reporting.
+      - name: subcategory
+        description: More detailed product grouping within a category.
 
   - name: stg_orders
+    description: Cleaned order-line data used as the base for sales and refund metrics.
+    meta:
+      ai_hint:
+        role: "base"
+        grain: "one row per order line"
+        use_for: "transaction-level logic and joins"
+        avoid_for: "chatbot answers when a serving mart already captures the metric"
     columns:
       - name: order_line_id
+        description: Stable identifier for the order-line record.
         tests:
           - not_null
           - unique
       - name: customer_id
+        description: Customer associated with the order line.
         tests:
           - relationships:
               arguments:
                 to: ref('stg_customers')
                 field: customer_id
       - name: product_id
+        description: Product associated with the order line.
         tests:
           - relationships:
               arguments:
                 to: ref('stg_products')
                 field: product_id
+      - name: order_date
+        description: Calendar date on which the order was placed.
+      - name: quantity
+        description: Number of units purchased on the order line.
+      - name: net_amount
+        description: Net booked revenue after discounts for the order line.
+      - name: refund_flag
+        description: Indicates whether the order line was refunded.
+      - name: refund_amount
+        description: Refund value recorded against the order line.
 
   - name: stg_events
+    description: Cleaned behavioral event data capturing product interactions and session activity.
+    meta:
+      ai_hint:
+        role: "base"
+        grain: "one row per event"
+        use_for: "behavioral activity and engagement building blocks"
+        avoid_for: "direct chatbot answers when engagement marts exist"
     columns:
       - name: event_id
+        description: Stable identifier for the event record.
         tests:
           - not_null
           - unique
       - name: customer_id
+        description: Customer associated with the event when available.
         tests:
           - relationships:
               arguments:
                 to: ref('stg_customers')
                 field: customer_id
       - name: product_id
+        description: Product associated with the event when available.
         tests:
           - relationships:
               arguments:
                 to: ref('stg_products')
                 field: product_id
+      - name: event_type
+        description: Type of activity, such as product view or purchase.
+      - name: event_date
+        description: Calendar date of the event.
 
   - name: stg_support_tickets
+    description: Cleaned support ticket records with issue metadata and free-text complaint content.
+    meta:
+      ai_hint:
+        role: "base"
+        grain: "one row per support ticket"
+        use_for: "support operations analysis and text retrieval preparation"
+        avoid_for: "direct chatbot answers when enriched support models exist"
     columns:
       - name: ticket_id
+        description: Stable support ticket identifier.
         tests:
           - not_null
           - unique
       - name: customer_id
+        description: Customer who opened the support ticket.
         tests:
           - relationships:
               arguments:
                 to: ref('stg_customers')
                 field: customer_id
       - name: product_id
+        description: Product linked to the support issue when available.
         tests:
           - relationships:
               arguments:
                 to: ref('stg_products')
                 field: product_id
+      - name: issue_type
+        description: Standardized issue category for the ticket.
+      - name: priority
+        description: Ticket urgency level.
+      - name: resolution_time_hours
+        description: Time taken to resolve the ticket in hours.
+      - name: csat_score
+        description: Customer satisfaction score captured for the ticket.
+      - name: ticket_text
+        description: Free-text complaint or request content.
 
   - name: dim_customers
+    description: Customer dimension used for reporting and serving-table joins.
+    meta:
+      ai_hint:
+        role: "dimension"
+        grain: "one row per customer"
+        use_for: "customer attributes such as region, segment, and acquisition channel"
+        join_keys:
+          - "customer_id"
     columns:
       - name: customer_id
+        description: Stable customer identifier.
         tests:
           - not_null
           - unique
+      - name: region
+        description: Reporting region for the customer.
+      - name: segment
+        description: Business segment assigned to the customer.
 
   - name: dim_products
+    description: Product dimension used for reporting and serving-table joins.
+    meta:
+      ai_hint:
+        role: "dimension"
+        grain: "one row per product"
+        use_for: "product attributes such as name, category, and status"
+        join_keys:
+          - "product_id"
     columns:
       - name: product_id
+        description: Stable product identifier.
         tests:
           - not_null
           - unique
+      - name: product_name
+        description: Human-readable product name.
+      - name: category
+        description: Top-level product category.
+      - name: subcategory
+        description: More detailed product grouping.
 
   - name: fct_support_tickets_enriched
+    description: Denormalized support fact table with customer, product, and ticket text context in one place.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per support ticket"
+        use_for: "ticket-level filtering, support analysis, and text retrieval preparation"
+        best_for:
+          - "support questions by product, category, region, segment, issue type, or priority"
+          - "joining ticket facts to customer or product context without extra joins"
     columns:
       - name: ticket_id
+        description: Stable support ticket identifier.
         tests:
           - not_null
           - unique
+      - name: created_date
+        description: Calendar date on which the ticket was created.
+      - name: region
+        description: Region of the customer who opened the ticket.
+      - name: segment
+        description: Customer segment associated with the ticket.
+      - name: product_id
+        description: Product associated with the support issue.
+      - name: product_name
+        description: Product name associated with the support issue.
+      - name: category
+        description: Product category associated with the support issue.
+      - name: issue_type
+        description: Standardized issue category for the ticket.
+      - name: priority
+        description: Ticket urgency level.
+      - name: resolution_time_hours
+        description: Time taken to resolve the ticket in hours.
+      - name: csat_score
+        description: Customer satisfaction score captured for the ticket.
+      - name: ticket_text
+        description: Free-text customer complaint or request.
 
   - name: mart_product_risk
+    description: Product-day serving table that combines commercial, engagement, and support signals into a product risk view.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per product per metric_date"
+        use_for: "product risk, operational weakness, refund pain, and mixed structured support analysis"
+        best_for:
+          - "which products look risky or operationally fragile"
+          - "product-level summaries that combine revenue, refunds, engagement, and complaint load"
+        primary_dimensions:
+          - "metric_date"
+          - "product_id"
+          - "product_name"
+          - "category"
+        primary_metrics:
+          - "risk_score"
+          - "refund_rate"
+          - "net_revenue"
+          - "complaint_count"
+          - "avg_csat_score"
     columns:
       - name: product_id
+        description: Stable product identifier.
         tests:
           - not_null
       - name: metric_date
+        description: Calendar date for the risk snapshot.
         tests:
           - not_null
+      - name: product_name
+        description: Human-readable product name.
+      - name: category
+        description: Product category.
+      - name: units_sold
+        description: Total units sold for the product on the metric date.
+      - name: net_revenue
+        description: Net revenue booked for the product on the metric date.
+      - name: refund_rate
+        description: Refund amount divided by net revenue for the product on the metric date.
+      - name: complaint_count
+        description: Number of support-ticket complaints associated with the product on the metric date.
+      - name: avg_csat_score
+        description: Average CSAT score for support tickets associated with the product on the metric date.
+      - name: support_page_views
+        description: Count of support-related page views associated with the product on the metric date.
+      - name: risk_score
+        description: Composite product risk score derived from refund, complaint, engagement, and support signals.
+
+  - name: mart_revenue_daily
+    description: Daily revenue and refund serving table aggregated by product category and customer region.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per order_date, category, and region"
+        use_for: "regional and category-level revenue and refund analysis"
+        best_for:
+          - "which regions or categories drive revenue"
+          - "refund-rate comparisons by region or category"
+        primary_dimensions:
+          - "order_date"
+          - "category"
+          - "region"
+        primary_metrics:
+          - "orders_count"
+          - "units_sold"
+          - "net_revenue"
+          - "refund_amount"
+          - "refund_rate"
+    columns:
+      - name: order_date
+        description: Calendar date for the aggregated revenue snapshot.
+      - name: category
+        description: Product category for the aggregated revenue snapshot.
+      - name: region
+        description: Customer region for the aggregated revenue snapshot.
+      - name: net_revenue
+        description: Net revenue after discounts for the category-region-date combination.
+      - name: refund_rate
+        description: Refund amount divided by net revenue for the category-region-date combination.
+
+  - name: mart_product_engagement_daily
+    description: Product-day serving table for engagement, conversion, and support-page behavior.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per product per event_date"
+        use_for: "product engagement, conversion, and support-interest analysis"
+        best_for:
+          - "which products are converting well"
+          - "which products have high support-page demand or behavior changes"
+        primary_dimensions:
+          - "event_date"
+          - "product_id"
+          - "category"
+        primary_metrics:
+          - "product_views"
+          - "add_to_cart_events"
+          - "purchase_events"
+          - "support_page_views"
+          - "product_view_to_purchase_rate"
+    columns:
+      - name: event_date
+        description: Calendar date for the product engagement snapshot.
+      - name: product_id
+        description: Product identifier for the engagement snapshot.
+      - name: category
+        description: Product category for the engagement snapshot.
+      - name: product_views
+        description: Number of product-view events for the product on the event date.
+      - name: purchase_events
+        description: Number of purchase events attributed to the product on the event date.
+      - name: support_page_views
+        description: Number of support-page visits associated with the product on the event date.
+      - name: product_view_to_purchase_rate
+        description: Purchase events divided by product views for the product on the event date.
+
+  - name: mart_support_issue_trends
+    description: Product-day issue-trend serving table for support-ticket volume, resolution time, and CSAT.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per created_date, product_id, issue_type, and priority"
+        use_for: "support load, issue-type trends, and ticket quality metrics"
+        best_for:
+          - "which issue types create support load"
+          - "which issue types take longest to resolve"
+          - "how CSAT varies across issue types"
+        primary_dimensions:
+          - "created_date"
+          - "product_id"
+          - "issue_type"
+          - "priority"
+        primary_metrics:
+          - "tickets_count"
+          - "avg_resolution_time_hours"
+          - "avg_csat_score"
+          - "open_tickets_count"
+    columns:
+      - name: created_date
+        description: Calendar date for the support issue snapshot.
+      - name: product_id
+        description: Product identifier associated with the issue trend.
+      - name: category
+        description: Product category associated with the issue trend.
+      - name: issue_type
+        description: Standardized issue category for the support trend.
+      - name: priority
+        description: Ticket priority for the support trend.
+      - name: tickets_count
+        description: Number of tickets in the support trend grouping.
+      - name: avg_resolution_time_hours
+        description: Average time to resolution in hours for the support trend grouping.
+      - name: avg_csat_score
+        description: Average CSAT score for the support trend grouping.
+      - name: open_tickets_count
+        description: Count of tickets still open in the support trend grouping.
+
+  - name: mart_product_sales
+    description: Product-day serving table for sales rankings, revenue, unit movement, and refund performance.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per product per metric_date"
+        use_for: "product sales rankings and product refund performance"
+        best_for:
+          - "highest selling products"
+          - "top products by units sold, revenue, orders, or refunds"
+        primary_dimensions:
+          - "metric_date"
+          - "product_id"
+          - "product_name"
+          - "category"
+        primary_metrics:
+          - "units_sold"
+          - "net_revenue"
+          - "orders_count"
+          - "refund_rate"
+        default_business_interpretation:
+          highest_selling_product: "units_sold"
+    columns:
+      - name: product_id
+        description: Stable product identifier.
+        tests:
+          - not_null
+      - name: metric_date
+        description: Calendar date for the product sales snapshot.
+        tests:
+          - not_null
+      - name: product_name
+        description: Human-readable product name.
+      - name: category
+        description: Product category.
+      - name: orders_count
+        description: Number of distinct orders containing the product on the metric date.
+      - name: unique_customers
+        description: Number of distinct customers who purchased the product on the metric date.
+      - name: units_sold
+        description: Total units sold for the product on the metric date.
+      - name: gross_revenue
+        description: Gross revenue before discounts for the product on the metric date.
+      - name: discounts
+        description: Total discount amount applied to the product on the metric date.
+      - name: net_revenue
+        description: Net revenue after discounts for the product on the metric date.
+      - name: refund_orders_count
+        description: Number of refunded order lines for the product on the metric date.
+      - name: refund_amount
+        description: Total refund value recorded against the product on the metric date.
+      - name: refund_rate
+        description: Refund amount divided by net revenue for the product on the metric date.
+
+  - name: mart_region_customer_health
+    description: Region-day serving table that combines commercial and support health signals by customer region.
+    meta:
+      ai_hint:
+        role: "serving"
+        grain: "one row per region per metric_date"
+        use_for: "region-level commercial performance and region-level support health"
+        best_for:
+          - "which regions look weak or strong"
+          - "regional revenue and complaint comparisons"
+        primary_dimensions:
+          - "metric_date"
+          - "region"
+        primary_metrics:
+          - "net_revenue"
+          - "refund_rate"
+          - "tickets_count"
+          - "avg_csat_score"
+          - "complaint_customers"
+    columns:
+      - name: region
+        description: Reporting region for the aggregated customer health view.
+        tests:
+          - not_null
+      - name: metric_date
+        description: Calendar date for the regional health snapshot.
+        tests:
+          - not_null
+      - name: orders_count
+        description: Number of distinct orders placed by customers in the region on the metric date.
+      - name: unique_customers
+        description: Number of distinct customers active in orders for the region on the metric date.
+      - name: units_sold
+        description: Total units sold in the region on the metric date.
+      - name: gross_revenue
+        description: Gross revenue before discounts in the region on the metric date.
+      - name: net_revenue
+        description: Net revenue after discounts in the region on the metric date.
+      - name: refund_amount
+        description: Total refund value recorded for the region on the metric date.
+      - name: refund_rate
+        description: Refund amount divided by net revenue for the region on the metric date.
+      - name: tickets_count
+        description: Number of support tickets opened by customers in the region on the metric date.
+      - name: complaint_customers
+        description: Number of distinct customers in the region who opened support tickets on the metric date.
+      - name: avg_resolution_time_hours
+        description: Average support resolution time for tickets opened in the region on the metric date.
+      - name: avg_csat_score
+        description: Average CSAT score for tickets opened in the region on the metric date.
+      - name: open_tickets_count
+        description: Count of tickets still open in the region on the metric date.

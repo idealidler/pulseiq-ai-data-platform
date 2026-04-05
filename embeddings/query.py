@@ -59,6 +59,7 @@ def search_support_tickets(
                 "product_id": payload.get("product_id"),
                 "product_name": payload.get("product_name"),
                 "category": payload.get("category"),
+                "region": payload.get("region"),
                 "issue_type": payload.get("issue_type"),
                 "priority": payload.get("priority"),
                 "created_date": payload.get("created_date"),

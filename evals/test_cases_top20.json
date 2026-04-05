@@ -1,0 +1,162 @@
+[
+  {
+    "id": "top20_highest_selling_product",
+    "question": "Which is the highest selling product?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["product", "selling", "sold"],
+    "max_answer_words": 160
+  },
+  {
+    "id": "top20_most_refunds_customer",
+    "question": "Which customer has filed for the most refunds?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["customer", "refund"],
+    "max_answer_words": 160
+  },
+  {
+    "id": "top20_highest_refund_category",
+    "question": "Which product categories have the highest refund rate?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["category", "refund", "rate"],
+    "max_answer_words": 160
+  },
+  {
+    "id": "top20_top_revenue_region",
+    "question": "Which regions are driving the most net revenue?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["region", "revenue", "net"],
+    "max_answer_words": 160
+  },
+  {
+    "id": "top20_best_conversion_products",
+    "question": "Which products are converting best from product views to purchases?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["product", "views", "purchase"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "top20_biggest_support_load",
+    "question": "Which issue types are creating the biggest support load?",
+    "expected_route": "sql",
+    "required_evidence_tools": ["run_sql_query"],
+    "answer_keywords_any": ["issue", "support", "tickets"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "top20_lowest_csat_voice",
+    "question": "Which products have the lowest CSAT and what are customers saying?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["csat", "customers", "saying"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_high_refund_why",
+    "question": "Which products have the highest refund rates and why are customers unhappy with them?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["refund", "customers", "unhappy"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_battery_issues_electronics",
+    "question": "What are customers saying about battery issues in electronics?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["battery", "electronics", "customers"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "top20_wrong_item_apparel",
+    "question": "Summarize wrong-item complaints in apparel.",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["wrong", "item", "apparel"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "top20_setup_confusion",
+    "question": "What are customers saying about confusing setup experiences?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["setup", "confusing", "customers"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "top20_refund_pain_last_30_days",
+    "question": "What changed in the last 30 days for refund-related customer pain?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["30", "refund", "customers"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_compare_electronics_beauty",
+    "question": "Compare electronics and beauty in terms of risk and complaint themes.",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["electronics", "beauty", "complaint"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_operational_picture",
+    "question": "Give me the current operational picture in one answer.",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["operational", "risk", "customers"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_support_page_view_risk",
+    "question": "Which risky products also drive the most support page views, and what complaint themes back that up?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["risk", "support", "themes"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_longest_resolution",
+    "question": "Which issue types take longest to resolve, and how do customers describe those experiences?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["issue", "resolve", "customers"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_apparel_returns_or_else",
+    "question": "Are apparel customers mostly asking for returns or talking about something else?",
+    "expected_route": "vector",
+    "required_evidence_tools": ["run_vector_search"],
+    "answer_keywords_any": ["apparel", "returns", "customers"],
+    "max_answer_words": 180
+  },
+  {
+    "id": "top20_operational_fragility",
+    "question": "Which products look operationally fragile, and what specific customer pain backs that up?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["operational", "customer", "pain"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_recent_decline_regions",
+    "question": "Which regions look weaker lately based on revenue and customer complaints?",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["region", "revenue", "complaints"],
+    "max_answer_words": 220
+  },
+  {
+    "id": "top20_grounded_riskiest_products",
+    "question": "Show the riskiest products, but only claim complaint themes if the ticket evidence matches the same product.",
+    "expected_route": "hybrid",
+    "required_evidence_tools": ["run_sql_query", "run_vector_search"],
+    "answer_keywords_any": ["same product", "evidence", "risk"],
+    "max_answer_words": 220
+  }
+]
