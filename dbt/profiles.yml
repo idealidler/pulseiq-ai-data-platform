@@ -3,5 +3,5 @@ pulseiq:
   outputs:
     dev:
       type: duckdb
-      path: /Users/akshayjain/Documents/chat_bot/data/warehouse/pulseiq.duckdb
+      path: "{{ env_var('DUCKDB_PATH', 'data/warehouse/pulseiq.duckdb') }}"
       threads: 4
