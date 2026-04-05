@@ -172,9 +172,6 @@ export function ArchitectureTab() {
                 <div className="text-[11px] uppercase tracking-[0.28em] text-steel">Tech stack</div>
                 <h2 className="mt-2 font-display text-3xl text-ink">What is actually in the stack</h2>
               </div>
-              <div className="rounded-full bg-ink px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-shell">
-                Production-style
-              </div>
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {techStack.map((item) => {
@@ -207,9 +204,6 @@ export function ArchitectureTab() {
             <div>
               <div className="text-[11px] uppercase tracking-[0.28em] text-steel">System map</div>
               <h2 className="mt-2 font-display text-4xl text-ink">Seven layers from fake source systems to grounded answers</h2>
-            </div>
-            <div className="rounded-full bg-ink px-4 py-2 text-[10px] uppercase tracking-[0.22em] text-shell">
-              End-to-end path
             </div>
           </div>
 
