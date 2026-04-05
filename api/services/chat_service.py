@@ -487,7 +487,7 @@ def answer_question(question: str, debug: bool = False) -> dict[str, Any]:
     if not api_key:
         raise ValueError("OPENAI_API_KEY is required for chat answers.")
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key, timeout=45.0, max_retries=1)
     model = os.environ.get("CHAT_MODEL", "gpt-4o-mini")
     dynamic_guidance = _question_guidance(question)
     schema_context = get_assistant_schema_context()
@@ -507,8 +507,9 @@ def answer_question(question: str, debug: bool = False) -> dict[str, Any]:
     tool_errors: list[dict[str, str]] = []
     tool_rejections = 0
     max_tool_errors = 3
+    max_rounds = 6
 
-    while True:
+    for _ in range(max_rounds):
         response = client.responses.create(
             model=model,
             input=input_items,
@@ -653,3 +654,35 @@ def answer_question(question: str, debug: bool = False) -> dict[str, Any]:
             evidence = _supplement_hybrid_vector_evidence(question, evidence, settings)
             if any(item["tool"] == "run_vector_search" for item in evidence):
                 tools_used.add("run_vector_search")
+
+    route = _route_from_tools(tools_used)
+    if route == "hybrid":
+        evidence = _supplement_hybrid_vector_evidence(question, evidence, settings)
+        route = _route_from_tools(tools_used)
+
+    summarized_evidence = _summarize_evidence(evidence)
+    debug_payload = {
+        "raw_evidence": evidence,
+        "tool_errors": tool_errors,
+        "timeout_reason": "max_tool_rounds_exceeded",
+    } if debug else None
+
+    if evidence:
+        return {
+            "answer": _compose_grounded_answer(
+                question=question,
+                route=route,
+                evidence=evidence,
+                raw_answer="I gathered evidence, but the tool loop did not converge cleanly. Here is the grounded summary from the evidence I was able to collect.",
+            ),
+            "route": route,
+            "evidence": summarized_evidence,
+            "debug": debug_payload,
+        }
+
+    return {
+        "answer": "I could not complete the request reliably because the retrieval loop did not finish cleanly. Please try again or narrow the question slightly.",
+        "route": route,
+        "evidence": summarized_evidence,
+        "debug": debug_payload,
+    }
