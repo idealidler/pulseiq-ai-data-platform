@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,11 +11,28 @@ from api.schemas.chat import ChatRequest, ChatResponse
 from api.services.chat_service import answer_question
 
 
+def _allowed_origins() -> list[str]:
+    default_origins = [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ]
+    raw_origins = os.environ.get("CORS_ALLOW_ORIGINS", "")
+    configured = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for origin in [*default_origins, *configured]:
+        if origin not in seen:
+            ordered.append(origin)
+            seen.add(origin)
+    return ordered
+
+
 app = FastAPI(title="PulseIQ API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

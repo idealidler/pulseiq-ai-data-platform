@@ -110,10 +110,17 @@ Useful optional values:
 
 - `CHAT_MODEL=gpt-4o-mini`
 - `EMBEDDING_MODEL=text-embedding-3-small`
+- `CORS_ALLOW_ORIGINS=http://127.0.0.1:5173,http://localhost:5173`
 
 ### 3. Frontend environment
 
 Optional: create `frontend/.env` from `frontend/.env.example` if you want to point the UI at a non-default API URL.
+
+For deployment:
+
+- set `CORS_ALLOW_ORIGINS` on the backend to your frontend domain
+- example:
+  - `CORS_ALLOW_ORIGINS=https://your-project.vercel.app`
 
 ## End-to-End Run
 
