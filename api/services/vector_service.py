@@ -11,7 +11,7 @@ def run_vector_search(
     qdrant_path: str | Path,
     collection_name: str,
     embedding_model: str,
-    limit: int = 5,
+    limit: int = 3,
     filters: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     return search_support_tickets(
@@ -19,6 +19,6 @@ def run_vector_search(
         qdrant_path=qdrant_path,
         collection_name=collection_name,
         embedding_model=embedding_model,
-        limit=limit,
+        limit=max(1, min(limit, 3)),
         filters=filters,
     )

@@ -76,7 +76,7 @@ VECTOR_TOOL = {
         "type": "object",
         "properties": {
             "query_text": {"type": "string"},
-            "limit": {"type": "integer", "default": 5},
+            "limit": {"type": "integer", "default": 3, "maximum": 3},
             "filters": {
                 "type": "object",
                 "properties": {

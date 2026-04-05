@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +10,16 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 
 from embeddings.indexer import embed_texts
+
+
+@lru_cache(maxsize=1)
+def _get_openai_client(api_key: str) -> OpenAI:
+    return OpenAI(api_key=api_key, timeout=20.0, max_retries=1)
+
+
+@lru_cache(maxsize=2)
+def _get_qdrant_client(qdrant_path: str) -> QdrantClient:
+    return QdrantClient(path=qdrant_path)
 
 
 def _build_filter(filters: dict[str, str] | None) -> Filter | None:
@@ -35,8 +46,9 @@ def search_support_tickets(
     if not api_key:
         raise ValueError("OPENAI_API_KEY is required to query embeddings.")
 
-    openai_client = OpenAI(api_key=api_key)
-    qdrant_client = QdrantClient(path=str(qdrant_path))
+    safe_limit = max(1, min(limit, 3))
+    openai_client = _get_openai_client(api_key)
+    qdrant_client = _get_qdrant_client(str(qdrant_path))
     query_vector = embed_texts(openai_client, embedding_model, [query_text])[0]
     search_filter = _build_filter(filters)
 
@@ -44,7 +56,7 @@ def search_support_tickets(
         collection_name=collection_name,
         query=query_vector,
         query_filter=search_filter,
-        limit=limit,
+        limit=safe_limit,
         with_payload=True,
     ).points
 
