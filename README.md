@@ -98,6 +98,8 @@ learning/       Project-specific learning notes and architecture chapters
 pip install -r requirements.txt
 ```
 
+This project is currently intended to run on Python `3.11.x`.
+
 ### 2. Environment variables
 
 Create a local `.env` in the repo root using `.env.example` as a guide.
@@ -121,6 +123,7 @@ For deployment:
 - set `CORS_ALLOW_ORIGINS` on the backend to your frontend domain
 - example:
   - `CORS_ALLOW_ORIGINS=https://your-project.vercel.app`
+- use Python `3.11.x` on the backend host because the current dbt stack is not stable on Python `3.14`
 
 ## End-to-End Run
 
