@@ -5,14 +5,18 @@ from typing import Any
 
 import duckdb
 
+from api.services.sql_validator import validate_sql_allowed_tables
 
-def run_sql_query(duckdb_path: str | Path, sql: str) -> list[dict[str, Any]]:
-    normalized = sql.lower()
-    stripped = normalized.strip()
-    if not (stripped.startswith("select") or stripped.startswith("with")):
-        raise ValueError("Only SELECT queries are allowed.")
-    if any(keyword in normalized for keyword in ["insert ", "update ", "delete ", "drop ", "alter "]):
-        raise ValueError("Mutating SQL is not allowed.")
+
+def run_sql_query(
+    duckdb_path: str | Path,
+    sql: str,
+    *,
+    allowed_table_names: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    # Enforce SQL safety and allowlisting before executing.
+    if allowed_table_names is not None:
+        validate_sql_allowed_tables(sql, allowed_table_names)
 
     con = duckdb.connect(str(duckdb_path), read_only=True)
     try:

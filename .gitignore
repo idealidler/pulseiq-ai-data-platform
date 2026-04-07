@@ -1,17 +1,34 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+*.pyd
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+*.egg-info/
+*.egg
+dist/
+build/
+.coverage
+htmlcov/
+.tox/
 
 # Virtual environments
 .venv/
 venv/
 env/
+ENV/
 
 # Environment files
 .env
+.env.local
+.env.*.local
+
+# Logging
+*.log
+logs/
 
 # Local warehouse and generated data
 data/source/
@@ -29,14 +46,34 @@ dbt/logs/
 
 # OS / editor
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+.sublime-*
+
+# IDE specific
+*.iml
+.gradle/
 
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/build/
 frontend/*.tsbuildinfo
 frontend/tailwind.config.js
 frontend/tailwind.config.d.ts
 frontend/vite.config.js
 frontend/vite.config.d.ts
+package-lock.json
+yarn.lock
+npm-debug.log
+yarn-error.log
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+temp/

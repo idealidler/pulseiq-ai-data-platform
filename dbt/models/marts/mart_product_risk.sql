@@ -1,25 +1,16 @@
 with revenue as (
     select
-        o.order_date as metric_date,
-        o.product_id,
-        p.product_name,
-        p.category,
-        p.subcategory,
-        count(distinct o.order_id) as orders_count,
-        sum(o.quantity) as units_sold,
-        round(sum(o.net_amount), 2) as net_revenue,
-        round(sum(o.refund_amount), 2) as refund_amount,
-        round(
-            case
-                when sum(o.net_amount) = 0 then 0
-                else sum(o.refund_amount) / sum(o.net_amount)
-            end,
-            4
-        ) as refund_rate
-    from {{ ref('stg_orders') }} as o
-    left join {{ ref('dim_products') }} as p
-        on o.product_id = p.product_id
-    group by 1, 2, 3, 4, 5
+        metric_date,
+        product_id,
+        product_name,
+        category,
+        subcategory,
+        orders_count,
+        units_sold,
+        net_revenue,
+        refund_amount,
+        refund_rate
+    from {{ ref('mart_product_sales') }}
 ),
 engagement as (
     select
@@ -40,11 +31,11 @@ support as (
     select
         created_date as metric_date,
         product_id,
-        sum(tickets_count) as complaint_count,
-        round(avg(avg_resolution_time_hours), 2) as avg_resolution_time_hours,
-        round(avg(avg_csat_score), 2) as avg_csat_score,
-        sum(open_tickets_count) as open_tickets_count
-    from {{ ref('mart_support_issue_trends') }}
+        count(ticket_id) as complaint_count,
+        round(avg(resolution_time_hours), 2) as avg_resolution_time_hours,
+        round(avg(csat_score), 2) as avg_csat_score,
+        sum(case when status = 'open' then 1 else 0 end) as open_tickets_count
+    from {{ ref('fct_support_tickets_enriched') }}
     group by 1, 2
 )
 
@@ -70,7 +61,7 @@ select
     coalesce(e.product_view_to_purchase_rate, 0) as product_view_to_purchase_rate,
     coalesce(s.complaint_count, 0) as complaint_count,
     coalesce(s.avg_resolution_time_hours, 0) as avg_resolution_time_hours,
-    coalesce(s.avg_csat_score, 0) as avg_csat_score,
+    coalesce(s.avg_csat_score, 5) as avg_csat_score,
     coalesce(s.open_tickets_count, 0) as open_tickets_count,
     round(
         (

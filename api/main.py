@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+import time
+import uuid
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
+from api.observability import clear_request_id, configure_logging, set_request_id
 from api.schemas.chat import ChatRequest, ChatResponse
 from api.services.chat_service import answer_question
+
+
+configure_logging()
+LOGGER = logging.getLogger(__name__)
 
 
 def _allowed_origins() -> list[str]:
@@ -37,6 +45,57 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def request_tracing_middleware(request: Request, call_next):
+    request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
+    token = set_request_id(request_id)
+    started_at = time.perf_counter()
+
+    LOGGER.info(
+        json.dumps(
+            {
+                "event": "http_request_started",
+                "request_id": request_id,
+                "method": request.method,
+                "path": request.url.path,
+            }
+        )
+    )
+
+    try:
+        response = await call_next(request)
+    except Exception:
+        LOGGER.exception(
+            json.dumps(
+                {
+                    "event": "http_request_failed",
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "latency_ms": int((time.perf_counter() - started_at) * 1000),
+                }
+            )
+        )
+        clear_request_id(token)
+        raise
+
+    response.headers["x-request-id"] = request_id
+    LOGGER.info(
+        json.dumps(
+            {
+                "event": "http_request_completed",
+                "request_id": request_id,
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": response.status_code,
+                "latency_ms": int((time.perf_counter() - started_at) * 1000),
+            }
+        )
+    )
+    clear_request_id(token)
+    return response
 
 
 @app.get("/health")

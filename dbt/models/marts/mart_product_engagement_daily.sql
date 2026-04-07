@@ -2,6 +2,7 @@ select
     e.event_date,
     e.product_id,
     p.category,
+    p.product_name,
     count(*) as total_events,
     count(distinct e.session_id) as sessions_count,
     count(distinct e.customer_id) as active_customers,
@@ -22,4 +23,4 @@ select
 from {{ ref('stg_events') }} as e
 left join {{ ref('dim_products') }} as p
     on e.product_id = p.product_id
-group by 1, 2, 3
+group by 1, 2, 3, 4

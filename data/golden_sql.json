@@ -1,0 +1,82 @@
+[
+  {
+    "question": "Which is the highest selling product?",
+    "sql": "SELECT product_id, product_name, SUM(units_sold) AS total_units_sold FROM mart_product_sales WHERE metric_date >= current_date - interval '30 days' GROUP BY product_id, product_name ORDER BY total_units_sold DESC LIMIT 1;"
+  },
+  {
+    "question": "Which product categories have the highest refund rate?",
+    "sql": "SELECT category, ROUND(SUM(refund_amount) / NULLIF(SUM(net_revenue), 0), 4) AS category_refund_rate FROM mart_product_sales WHERE metric_date >= current_date - interval '30 days' GROUP BY category ORDER BY category_refund_rate DESC NULLS LAST LIMIT 5;"
+  },
+  {
+    "question": "Which regions are driving the most net revenue recently?",
+    "sql": "SELECT region, SUM(net_revenue) AS total_net_revenue FROM mart_region_customer_health WHERE metric_date >= current_date - interval '30 days' GROUP BY region ORDER BY total_net_revenue DESC LIMIT 5;"
+  },
+  {
+    "question": "Which products are converting best from product views to purchases?",
+    "sql": "SELECT product_name, category, ROUND(SUM(purchase_events) * 1.0 / NULLIF(SUM(product_views), 0), 4) AS conversion_rate FROM mart_product_engagement_daily WHERE event_date >= current_date - interval '30 days' GROUP BY product_name, category HAVING SUM(product_views) > 50 ORDER BY conversion_rate DESC NULLS LAST LIMIT 5;"
+  },
+  {
+    "question": "Which products have the lowest product-view to purchase rate?",
+    "sql": "SELECT product_name, category, ROUND(SUM(purchase_events) * 1.0 / NULLIF(SUM(product_views), 0), 4) AS conversion_rate FROM mart_product_engagement_daily WHERE event_date >= current_date - interval '30 days' GROUP BY product_name, category HAVING SUM(product_views) > 50 ORDER BY conversion_rate ASC NULLS LAST LIMIT 5;"
+  },
+  {
+    "question": "Which issue types are creating the biggest support load?",
+    "sql": "SELECT issue_type, SUM(tickets_count) AS total_tickets FROM mart_support_issue_trends WHERE created_date >= current_date - interval '30 days' GROUP BY issue_type ORDER BY total_tickets DESC LIMIT 5;"
+  },
+  {
+    "question": "Which products have the lowest CSAT and what are customers actually saying?",
+    "sql": "SELECT product_id, product_name, ROUND(AVG(csat_score), 2) AS average_csat FROM fct_support_tickets_enriched WHERE created_date >= current_date - interval '30 days' GROUP BY product_id, product_name HAVING COUNT(ticket_id) > 5 ORDER BY average_csat ASC NULLS LAST LIMIT 3;"
+  },
+  {
+    "question": "Which products have the highest risk score?",
+    "sql": "SELECT product_id, product_name, risk_score FROM mart_product_risk WHERE metric_date = (SELECT MAX(metric_date) FROM mart_product_risk) ORDER BY risk_score DESC NULLS LAST, product_name ASC LIMIT 5;"
+  },
+  {
+    "question": "Which risky products also drive the most support page views, and what complaint themes back that up?",
+    "sql": "SELECT product_id, product_name, ROUND(AVG(risk_score), 2) AS avg_risk, SUM(support_page_views) AS total_support_views FROM mart_product_risk WHERE metric_date >= current_date - interval '30 days' GROUP BY product_id, product_name ORDER BY avg_risk DESC, total_support_views DESC LIMIT 5;"
+  },
+  {
+    "question": "Which issue types take longest to resolve, and how do customers describe those experiences?",
+    "sql": "SELECT issue_type, ROUND(AVG(resolution_time_hours), 2) AS avg_resolution_time FROM fct_support_tickets_enriched WHERE created_date >= current_date - interval '30 days' GROUP BY issue_type HAVING COUNT(ticket_id) > 5 ORDER BY avg_resolution_time DESC NULLS LAST LIMIT 5;"
+  },
+  {
+    "question": "Compare electronics and beauty in terms of risk and complaint themes.",
+    "sql": "SELECT category, SUM(complaint_count) AS total_complaints, SUM(refund_amount) AS total_refunds FROM mart_product_risk WHERE category IN ('Electronics', 'Beauty') AND metric_date >= current_date - interval '30 days' GROUP BY category;"
+  },
+  {
+    "question": "What changed in the last 30 days for refund-related customer pain?",
+    "sql": "SELECT metric_date, SUM(refund_amount) AS daily_refunds, SUM(complaint_count) AS daily_complaints FROM mart_product_risk WHERE metric_date >= current_date - interval '30 days' GROUP BY metric_date ORDER BY metric_date ASC;"
+  },
+  {
+    "question": "Give me the current operational picture in one answer.",
+    "sql": "SELECT SUM(net_revenue) AS total_revenue, SUM(refund_amount) AS total_refunds, SUM(complaint_count) AS total_complaints, SUM(open_tickets_count) AS total_open_tickets FROM mart_product_risk WHERE metric_date >= current_date - interval '7 days';"
+  },
+  {
+    "question": "Which regions look weaker lately based on revenue and customer complaints?",
+    "sql": "SELECT region, SUM(net_revenue) AS total_revenue, SUM(tickets_count) AS total_complaints FROM mart_region_customer_health WHERE metric_date >= current_date - interval '30 days' GROUP BY region ORDER BY total_revenue ASC, total_complaints DESC LIMIT 5;"
+  },
+  {
+    "question": "Which products have the most open support tickets?",
+    "sql": "SELECT product_id, product_name, SUM(open_tickets_count) AS total_open_tickets FROM mart_support_issue_trends WHERE created_date = (SELECT MAX(created_date) FROM mart_support_issue_trends) GROUP BY product_id, product_name ORDER BY total_open_tickets DESC LIMIT 5;"
+  },
+  {
+    "question": "Which customer has filed for the most refunds?",
+    "sql": "SELECT customer_id, SUM(case when refund_flag then 1 else 0 end) as total_refund_orders, SUM(refund_amount) as total_refund_amount FROM stg_orders WHERE order_date >= current_date - interval '90 days' GROUP BY customer_id ORDER BY total_refund_orders DESC LIMIT 1;"
+  },
+  {
+    "question": "Which products have the highest support page views?",
+    "sql": "SELECT product_id, product_name, SUM(support_page_views) AS total_support_views FROM mart_product_engagement_daily WHERE event_date >= current_date - interval '30 days' GROUP BY product_id, product_name ORDER BY total_support_views DESC LIMIT 5;"
+  },
+  {
+    "question": "Which products have both high support page views and rising complaints?",
+    "sql": "SELECT product_id, product_name, SUM(support_page_views) AS total_support_views, SUM(complaint_count) AS total_complaints FROM mart_product_risk WHERE metric_date >= current_date - interval '30 days' GROUP BY product_id, product_name HAVING SUM(support_page_views) > 100 AND SUM(complaint_count) > 10 ORDER BY total_complaints DESC, total_support_views DESC LIMIT 5;"
+  },
+  {
+    "question": "Which products have high refund rates and what are customers saying about them?",
+    "sql": "SELECT product_id, product_name, ROUND(SUM(refund_amount) / NULLIF(SUM(net_revenue), 0), 4) AS product_refund_rate FROM mart_product_sales WHERE metric_date >= current_date - interval '30 days' GROUP BY product_id, product_name HAVING SUM(net_revenue) > 1000 ORDER BY product_refund_rate DESC NULLS LAST LIMIT 3;"
+  },
+  {
+    "question": "Which apparel products are most risky and are customers mainly asking for returns or something else?",
+    "sql": "SELECT product_id, product_name, ROUND(AVG(risk_score), 2) AS avg_risk_score FROM mart_product_risk WHERE category = 'Apparel' AND metric_date >= current_date - interval '30 days' GROUP BY product_id, product_name ORDER BY avg_risk_score DESC NULLS LAST LIMIT 3;"
+  }
+]

@@ -1,6 +1,7 @@
 select
     o.order_date,
     p.category,
+    p.product_name,
     c.region,
     count(distinct o.order_id) as orders_count,
     sum(o.quantity) as units_sold,
@@ -20,4 +21,4 @@ left join {{ ref('stg_products') }} as p
     on o.product_id = p.product_id
 left join {{ ref('stg_customers') }} as c
     on o.customer_id = c.customer_id
-group by 1, 2, 3
+group by 1, 2, 3, 4
